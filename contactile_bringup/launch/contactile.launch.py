@@ -35,7 +35,6 @@ def generate_launch_description():
             name="contactile_node",
             namespace="contactile",
             parameters=[{
-                "hub_id": LaunchConfiguration("hub_id", default=0),
                 "num_sensors": LaunchConfiguration("num_sensors", default=10),
                 "baud_rate": LaunchConfiguration("baud_rate", default=9600),
                 "parity": LaunchConfiguration("parity", default=0),

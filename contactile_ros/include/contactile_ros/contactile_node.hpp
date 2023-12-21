@@ -55,7 +55,6 @@ protected:
   void update_data();
 
 private:
-  int hub_id_;
   int num_sensors_;
   int baud_rate_;
   int parity_;
@@ -70,6 +69,7 @@ private:
       sensor_pubs_;
   rclcpp::Service<contactile_msgs::srv::BiasRequest>::SharedPtr
       send_bias_request_srv_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   void send_bias_request_cb(
       const std::shared_ptr<contactile_msgs::srv::BiasRequest::Request> req,

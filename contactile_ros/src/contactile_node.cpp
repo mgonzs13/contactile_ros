@@ -50,8 +50,7 @@ ContactileNode::ContactileNode()
     this->sensors_.push_back(std::move(sensor));
 
     // publishers for sensor
-    std::string topic =
-        "/hub_" + std::to_string(hub_id_) + "/sensor_" + std::to_string(i);
+    std::string topic = "sensor_" + std::to_string(i);
     auto sensor_pub =
         this->create_publisher<contactile_msgs::msg::ButtonSensorState>(topic,
                                                                         1);
@@ -73,8 +72,7 @@ ContactileNode::ContactileNode()
 
   // start services
   RCLCPP_INFO(this->get_logger(), "Starting services...");
-  std::string service_name =
-      "/hub_" + std::to_string(hub_id_) + "/send_bias_request";
+  std::string service_name = "send_bias_request";
   this->send_bias_request_srv_ =
       this->create_service<contactile_msgs::srv::BiasRequest>(
           service_name,
@@ -82,7 +80,8 @@ ContactileNode::ContactileNode()
   RCLCPP_INFO(this->get_logger(), "Started %s service", service_name.c_str());
 
   // start timer
-  this->create_wall_timer(33ms, std::bind(&ContactileNode::update_data, this));
+  this->timer_ = this->create_wall_timer(
+      33ms, std::bind(&ContactileNode::update_data, this));
 }
 
 void ContactileNode::load_params() {
@@ -96,6 +95,12 @@ void ContactileNode::load_params() {
                                     });
   this->declare_parameters<std::string>("", {{"com_port", "/dev/ttyACM0"}});
 
+  this->get_parameter("num_sensors", this->num_sensors_);
+  this->get_parameter("baud_rate", this->baud_rate_);
+  this->get_parameter("parity", this->parity_);
+  this->get_parameter("byte_size", this->byte_size_);
+  this->get_parameter("com_port", this->com_port_);
+
   if (num_sensors_ > MAX_NSENSOR or num_sensors_ < 1) {
     RCLCPP_ERROR(
         this->get_logger(),
@@ -104,13 +109,6 @@ void ContactileNode::load_params() {
   } else {
     RCLCPP_INFO(this->get_logger(), "Using %d sensor/s", num_sensors_);
   }
-
-  this->get_parameter("hub_id", this->hub_id_);
-  this->get_parameter("num_sensors", this->num_sensors_);
-  this->get_parameter("baud_rate", this->baud_rate_);
-  this->get_parameter("parity", this->parity_);
-  this->get_parameter("byte_size", this->byte_size_);
-  this->get_parameter("com_port", this->com_port_);
 
   RCLCPP_INFO(this->get_logger(), "Loaded parameters.\n");
 }
